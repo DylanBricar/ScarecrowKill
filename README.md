@@ -1,5 +1,7 @@
 # ScarecrowKill
 
+![Image de jeu](https://nsa40.casimages.com/img/2019/05/09/190509070048343129.png "image de jeu")
+
 ### **Concept du jeu :**
 
 Tirer sur un épouvantail en ajustant l'angle de tir pour gagner des points et devenir le premier du classement !
