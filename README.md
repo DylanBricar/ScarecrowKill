@@ -8,9 +8,9 @@
 
 ## 🖼️ Screenshot
 
-![Login](https://github.com/DylanBricar/ScarecrowKill/tree/master/ressources/login.png "Login")
-![Menu](https://github.com/DylanBricar/ScarecrowKill/tree/master/ressources/menu.png "Menu")
-![Game](https://github.com/DylanBricar/ScarecrowKill/tree/master/ressources/game.png "Game")
+![Login](https://github.com/DylanBricar/ScarecrowKill/blob/master/ressources/screens/login.png "Login")
+![Menu](https://github.com/DylanBricar/ScarecrowKill/blob/master/ressources/screens/menu.png "Menu")
+![Game](https://github.com/DylanBricar/ScarecrowKill/blob/master/ressources/screens/game.png "Game")
 
 ---
 
@@ -62,9 +62,7 @@
 
 ## 🏫 Background
 
-This project was developed during the final year of secondary school as part of the computer science course taught by  
-Mr. Bertocchi at Collège Roi Baudouin.  
-Website: [http://explore-photo.com/](http://explore-photo.com/)
+This project was developed during the final year of secondary school as part of the computer science course taught by Mr. Bertocchi at Collège Roi Baudouin. Website: [http://explore-photo.com/](http://explore-photo.com/)
 
 ---
 
