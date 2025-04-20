@@ -1,7 +1,12 @@
+import os
+import platform
 import sys
-sys.path.append("includes\\")
+
+includes_path = os.path.join(os.path.dirname(__file__), "includes")
+sys.path.append(includes_path)
 
 from tkinter import Tk, CENTER, Frame
+import tkinter as tk
 from GameCanon import GameCanon
 from LoginPage import LoginPage
 from MemberPanel import MemberPanel
@@ -9,88 +14,135 @@ from LoginError import LoginError
 from SignUpPage import SignUpPage
 
 
-# ----------------------------------------------------------------
-# -------------- GESTION DU CONTROLLER
-# ----------------------------------------------------------------
-
 class Controller(Frame):
-    """ Redirige l'utilisateur en fonction des événements apportés """
+    """ Redirects the user based on application events """
+
     def __init__(self, windows, **kwargs):
-        """ Lancement de l'application """
-        super().__init__(windows, **kwargs)  # Permet de récupérer les précédents arguments appelés
-        self.windows = windows  # Rend la fenêtre importée globale à toute la class
-
-        # Configurations de la fenêtre
+        """ Application initialization """
+        super().__init__(windows, **kwargs)
         self.windows = windows
-        windows.title('ScarecrowKill')
-        windows.geometry('1200x500')
-        windows.resizable(width=False, height=False)
-        windows.iconbitmap('ressources/favicon.ico')
 
-        # Affiche la fenêtre de connexion et demande de ne pas vider la fenêtre précédente
-        self.placeFrame(LoginPage(self.windows), False)
+        self.windows.title('ScarecrowKill')
+        self.windows.geometry('1200x500')
+        self.windows.resizable(width=False, height=False)
 
-        # Execute une fonction par rapport à l'évenement récupéré
-        self.call_frame.bind('<<LOGIN_SUCCES>>', self.is_logged)
-        self.call_frame.bind('<<LOGIN_ERROR>>', self.not_logged)
-        self.call_frame.bind('<<SIGNUP_PRESS>>', self.pressed_signup)
-        self.call_frame.bind('<<SIGNUP_SUCCESS>>', self.is_logged)
-        self.call_frame.bind('<<SIGNUP_BACK>>', self.pressed_signup_back)
-        self.call_frame.bind('<<GAME_JOIN>>', self.join_game)
-        self.call_frame.bind('<<GAME_LEAVE>>', self.is_logged)
-        self.call_frame.bind('<<LOGOUT_GAME>>', self.logout)
+        self._load_favicon()
 
-    def placeFrame(self, page, delete=True):
-        """ Permet de placer la nouvelle fenêtre et de détruire ou pas l'ancienne """
-        if delete: self.call_frame.destroy()  # Détruit la page précédente si la variable delete est sur True
-        self.call_frame = page  # Dirige vers la nouvelle page appelée
+        self.call_frame = None
+
+        self.place_frame(LoginPage(self.windows), False)
+
+        self._setup_event_bindings()
+
+    def _load_favicon(self):
+        """Loads the application icon in an optimized way"""
+        favicon_path = os.path.join(os.path.dirname(__file__), 'ressources', 'favicon.ico')
+        if os.path.exists(favicon_path):
+            self.windows.iconbitmap(favicon_path)
+
+    def _setup_event_bindings(self):
+        """Configures all event bindings"""
+
+        events = {
+            '<<LOGIN_SUCCES>>': self.is_logged,
+            '<<LOGIN_ERROR>>': self.not_logged,
+            '<<SIGNUP_PRESS>>': self.pressed_signup,
+            '<<SIGNUP_SUCCESS>>': self.is_logged,
+            '<<SIGNUP_BACK>>': self.pressed_signup_back,
+            '<<GAME_JOIN>>': self.join_game,
+            '<<GAME_LEAVE>>': self.is_logged,
+            '<<LOGOUT_GAME>>': self.logout
+        }
+
+        for event, handler in events.items():
+            self.call_frame.bind(event, handler)
+
+    def place_frame(self, page, delete=True):
+        """ Places a new frame and optionally destroys the old one """
+        if delete and self.call_frame:
+            self.call_frame.destroy()
+
+        self.call_frame = page
+
         self.call_frame.config(bg='#EDDAC3', padx=5000, pady=5000)
         self.call_frame.place(relx=0.5, rely=0.5, anchor=CENTER)
 
     def logout(self, event):
-        """ La connexion à l'utilisateur est réussie """
-        self.placeFrame(LoginPage(self.windows))
-        # Dirige vers la fonction prévue si celle-ci est appellée dans la page de connexion
-        self.call_frame.bind('<<SIGNUP_PRESS>>', self.pressed_signup)
-        self.call_frame.bind('<<LOGIN_SUCCES>>', self.is_logged)
-        self.call_frame.bind('<<LOGIN_ERROR>>', self.not_logged)
-        self.call_frame.bind('<<LOGOUT_GAME>>', self.logout)
+        """ Handles user logout """
+        self.place_frame(LoginPage(self.windows))
+        self._setup_login_bindings()
+
+    def _setup_login_bindings(self):
+        """Configures bindings for the login page"""
+        login_events = {
+            '<<SIGNUP_PRESS>>': self.pressed_signup,
+            '<<LOGIN_SUCCES>>': self.is_logged,
+            '<<LOGIN_ERROR>>': self.not_logged,
+            '<<LOGOUT_GAME>>': self.logout
+        }
+
+        for event, handler in login_events.items():
+            self.call_frame.bind(event, handler)
 
     def is_logged(self, event):
-        """ La connexion à l'utilisateur est réussie """
-        self.placeFrame(MemberPanel(self.windows))
-        # Dirige vers la fonction du jeu si celle-ci est appellée dans la page membre
-        self.call_frame.bind('<<GAME_JOIN>>', self.join_game)
-        # Dirige vers la fonction de déconnexion si celle-ci est appellée dans la page membre
-        self.call_frame.bind('<<LOGOUT_GAME>>', self.logout)
+        """ Successful user login """
+        self.place_frame(MemberPanel(self.windows))
+
+        member_events = {
+            '<<GAME_JOIN>>': self.join_game,
+            '<<LOGOUT_GAME>>': self.logout
+        }
+
+        for event, handler in member_events.items():
+            self.call_frame.bind(event, handler)
 
     def not_logged(self, event):
-        """ L'utilisateur a épuisé ses essais de connexion """
-        self.placeFrame(LoginError(self.windows))
+        """ User has exhausted login attempts """
+        self.place_frame(LoginError(self.windows))
 
     def pressed_signup(self, event):
-        """ Le bouton pour s'inscrire est pressé """
-        self.placeFrame(SignUpPage(self.windows))
-        # Dirige vers la fonction prévue si celle-ci est appellée dans la page d'inscription
-        self.call_frame.bind('<<SIGNUP_BACK>>', self.pressed_signup_back)
-        self.call_frame.bind('<<SIGNUP_SUCCESS>>', self.is_logged)
+        """ Signup button was pressed """
+        self.place_frame(SignUpPage(self.windows))
+
+        signup_events = {
+            '<<SIGNUP_BACK>>': self.pressed_signup_back,
+            '<<SIGNUP_SUCCESS>>': self.is_logged
+        }
+
+        for event, handler in signup_events.items():
+            self.call_frame.bind(event, handler)
 
     def pressed_signup_back(self, event):
-        """ L'utilisateur est retourné de la page d'inscription à connexion """
-        self.placeFrame(LoginPage(self.windows))
-        # Dirige vers la fonction prévue si celle-ci est appellée dans la page de connexion
-        self.call_frame.bind('<<SIGNUP_PRESS>>', self.pressed_signup)
-        self.call_frame.bind('<<LOGIN_SUCCES>>', self.is_logged)
-        self.call_frame.bind('<<LOGIN_ERROR>>', self.not_logged)
+        """ User went back from signup page to login page """
+        self.place_frame(LoginPage(self.windows))
+        self._setup_login_bindings()
 
     def join_game(self, event):
-        """ Rejoint le jeu du Canon """
-        self.placeFrame(GameCanon(self.windows))
-        # Dirige l'utilisateur vers la page de membre s'il quitte le jeu
+        """ Joins the Canon Game """
+        self.place_frame(GameCanon(self.windows))
+
         self.call_frame.bind('<<GAME_LEAVE>>', self.is_logged)
 
 
-# Défini et lance l'application TKinter
-windows = Tk()
-controller = Controller(windows)
-windows.mainloop()
+def main():
+    """Main entry point of the application"""
+
+    windows = Tk()
+
+    windows.update_idletasks()
+
+    windows.tk_setPalette(background='#EDDAC3')
+
+    if platform.system() == "Darwin":
+        try:
+            windows.tk.call('::tk::unsupported::MacWindowStyle', 'style', windows._w, 'document', 'closeBox')
+        except tk.TclError:
+            pass
+
+    controller = Controller(windows)
+
+    windows.mainloop()
+
+
+if __name__ == "__main__":
+    main()

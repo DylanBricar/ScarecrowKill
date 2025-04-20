@@ -1,89 +1,122 @@
 import sys
+
 sys.path.append("includes\\")
 
-from tkinter import Canvas, Frame, Label, Button, LEFT
+from tkinter import Canvas, Frame, Label, Button, LEFT, CENTER, Text, FLAT, font
 from PIL import Image, ImageTk
-from Divers import Divers
+from Utils import Utils
 from FileVerificator import FileVerificator
-
-# ----------------------------------------------------------------
-# -------------- PAGE DE MEMBRE
-# ----------------------------------------------------------------
 
 
 class MemberPanel(Frame):
-    """ Page de membre """
+    """ Member panel page """
+
     def __init__(self, windows, **kwargs):
-        """ Lancement de l'application """
-        super().__init__(windows, **kwargs)  # Permet de récupérer les précédents arguments appelés
-        self.windows = windows  # Rend la fenêtre importée globale à toute la class
-        self.verif = FileVerificator()  # Instancie la includes de vérification des fichiers
-        self._create_interface()  # Crée l'interface pour s'inscrire à l'application
+        """ Initialize the application """
+        super().__init__(windows, **kwargs)
+        self.windows = windows
+        self.verif = FileVerificator()
+        self._create_interface()
 
     def _create_interface(self):
-        """ Création de l'interface graphique """
-        # Crée le canvas avec le fond et collé au bord de la fenêtre
+        """ Create the graphical interface """
+
         self.bg_frame = Canvas(self.windows, width=1200, height=500, highlightthickness=0)
         self.bg_game = ImageTk.PhotoImage(Image.open('ressources/bg_start.png'))
         self.bg_frame.create_image(0, 0, image=self.bg_game, anchor='nw')
         self.bg_frame.place(x=0, y=0)
 
-        text_classement = ''.join(self.verif.classement(5))
-        ratio = Divers.ratio(Divers.staticSynthese[3], Divers.staticSynthese[4])
+        text_classement = self.verif.classement(5)
+        ratio = Utils.compute_ratio(Utils.staticSynthese[3], Utils.staticSynthese[4])
 
-        # Crée le conteneur du message de bienvenue
-        canv_bienvenue = Canvas(self.bg_frame, width=770, height=30)
-        canv_bienvenue.place(x=230, y=170)
+        screen_center_x = 600
+        left_panel_x = screen_center_x - 140
+        right_panel_x = screen_center_x + 210
 
-        # Crée le conteneur des informations personnelles
-        canv_info = Canvas(self.bg_frame, width=470, height=150)
-        canv_info.place(x=230, y=220)
+        header_y = 170
+        content_y = 300
+        footer_y = 420
 
-        # Crée le conteneur du classement
-        canv_classement = Canvas(self.bg_frame, width=280, height=150)
-        canv_classement.place(x=720, y=220)
+        canv_bienvenue_width = 770
+        canv_bienvenue_height = 50
+        canv_bienvenue = Canvas(self.bg_frame, width=canv_bienvenue_width, height=canv_bienvenue_height,
+                                highlightthickness=0, bg='#EDDAC3')
+        canv_bienvenue.place(x=screen_center_x, y=header_y, anchor=CENTER)
 
-        # Crée le conteneur des boutons
-        canv_buttons = Canvas(self.bg_frame, width=770, height=30)
-        canv_buttons.place(x=230, y=390)
+        canv_info_width = 470
+        canv_info_height = 150
+        canv_info = Canvas(self.bg_frame, width=canv_info_width, height=canv_info_height, highlightthickness=0,
+                           bg='#EDDAC3')
+        canv_info.place(x=left_panel_x, y=content_y, anchor=CENTER)
 
-        # Affiche le message de bienvenue avec la premiÃƒÂ¨re lettre du pseudo en majuscule
-        bienvenue = Label(canv_bienvenue, bg='white', fg='#EEAD0E', font=('Helvetica', 20, 'bold'), text='Bienvenue dans ton espace membre ' + str(Divers.staticSynthese[0].capitalize()) + ' !')
-        bienvenue.place(x=170, y=5)
+        canv_classement_width = 280
+        canv_classement_height = canv_info_height
+        canv_classement = Canvas(self.bg_frame, width=canv_classement_width, height=canv_classement_height,
+                                 highlightthickness=0, bg='#EDDAC3')
+        canv_classement.place(x=right_panel_x, y=content_y, anchor=CENTER)
 
-        # Affiche le titre des informations personnelles
-        Label(canv_info, fg='#CD5B45', bg='white', font=('Helvetica', 18, 'bold'), text='Informations :').place(x=170, y=10)
-        # Affiche toutes les informations personnelles
-        info = Label(canv_info, justify=LEFT, text='DerniÃƒÂ¨re connexion : le ' + str(Divers.staticSynthese[2]) + '.\nVous avez accumulé un total de ' + str(Divers.staticSynthese[3]) + ' tir' + Divers.pl(Divers.staticSynthese[3]) + ' gagnant' + Divers.pl(Divers.staticSynthese[3]) + '.\nVous avez accumulé un total de ' + str(Divers.staticSynthese[4]) + ' tir' + Divers.pl(Divers.staticSynthese[4]) + ' perdant' + Divers.pl(Divers.staticSynthese[4])+'.\nVotre ratio de tirs réussis/ratés s\'élÃƒÂ¨ve à ' + str(ratio) + '.')
-        info.place(x=10, y=40)
+        canv_buttons_width = 770
+        canv_buttons_height = 50
+        canv_buttons = Canvas(self.bg_frame, width=canv_buttons_width, height=canv_buttons_height, highlightthickness=0,
+                              bg='#EDDAC3')
+        canv_buttons.place(x=screen_center_x, y=footer_y, anchor=CENTER)
 
-        # Affiche le titre du classement
-        Label(canv_classement, fg='#CD5B45', bg='white', font=('Helvetica', 18, 'bold'), text='Classement :').place(x=80, y=10)
-        # Affiche la légende pour le classement
-        Label(canv_classement, justify=LEFT, text='## Pseudo : réussis | ratés => ratio').place(x=10, y=40)
-        # Affiche toutes les informations du classement
-        classement = Label(canv_classement, bg='white', justify=LEFT, text=text_classement)
-        classement.place(x=10, y=60)
+        bienvenue = Label(canv_bienvenue, bg='#EDDAC3', fg='#EEAD0E', font=('Helvetica', 20, 'bold'),
+                          text='Bienvenue dans ton espace membre ' + str(Utils.staticSynthese[0].capitalize()) + ' !',
+                          anchor=CENTER, padx=30, pady=10)
+        bienvenue.place(x=canv_bienvenue_width // 2, y=canv_bienvenue_height // 2, anchor=CENTER)
 
-        # Affiche le bouton pour lancer le jeu
-        play = Button(canv_buttons, fg='white', bg='#CA994F', text='Lancer le jeu', command=self.game_join)
-        play.grid(ipadx=10, ipady=2)
-        play.place(x=10, y=4)
+        Label(canv_info, fg='#CD5B45', bg='#EDDAC3', font=('Helvetica', 18, 'bold'), text='Informations :',
+              anchor=CENTER, padx=10).place(x=canv_info_width // 2, y=20, anchor=CENTER)
 
-        # Affiche le bouton pour se déconnecter de l'application
-        logout = Button(canv_buttons, fg='white', bg='#CA994F', text='Se déconnecter', command=self.game_disconnect)
-        logout.grid(ipadx=10, ipady=2)
-        logout.place(x=310, y=4)
+        successful_shots = Utils.staticSynthese[3]
+        failed_shots = Utils.staticSynthese[4]
+        
+        info_text = (
+            'Dernière connexion : le ' + str(Utils.staticSynthese[2]) + '.\n' +
+            'Vous avez accumulé un total de ' + str(successful_shots) + ' tir' + 
+            Utils.add_plural(successful_shots) + ' gagnant' + Utils.add_plural(successful_shots) + '.\n' +
+            'Vous avez accumulé un total de ' + str(failed_shots) + ' tir' + 
+            Utils.add_plural(failed_shots) + ' perdant' + Utils.add_plural(failed_shots) + '.\n' +
+            'Votre ratio de tirs réussis/ratés s\'élève à ' + str(ratio) + '.'
+        )
 
-        # Affiche le bouton pour quitter l'application
-        quit = Button(canv_buttons, fg='white', bg='#CA994F', text='Fermer la fenêtre', command=self.windows.destroy)
-        quit.grid(ipadx=10, ipady=2)
-        quit.place(x=630, y=4)
+        info = Label(canv_info, justify=LEFT, bg='#EDDAC3', text=info_text,
+                     wraplength=canv_info_width - 40, padx=20, pady=5)
+        info.place(x=canv_info_width // 2, y=85, anchor=CENTER)
+
+        Label(canv_classement, fg='#CD5B45', bg='#EDDAC3', font=('Helvetica', 18, 'bold'), text='Classement :',
+              anchor=CENTER, padx=10).place(x=canv_classement_width // 2, y=20, anchor=CENTER)
+
+        default_font = font.nametofont("TkDefaultFont")
+
+        classement_text = Text(canv_classement, bg='#EDDAC3', bd=0, highlightthickness=0, relief=FLAT,
+                               height=6, width=32, font=default_font, padx=20, pady=5)
+        classement_text.place(x=15, y=45)
+
+        classement_text.insert("1.0", "#")
+
+        for item in text_classement:
+            classement_text.insert("end", item)
+
+        classement_text.config(state="disabled")
+
+        button_frame = Frame(canv_buttons, bg='#EDDAC3')
+        button_frame.place(x=canv_buttons_width // 2, y=canv_buttons_height // 2, anchor=CENTER)
+
+        play = Button(button_frame, fg='white', bg='#CA994F', text='Lancer le jeu', command=self.game_join)
+        play.grid(row=0, column=0, padx=25, pady=10, ipadx=15, ipady=5)
+
+        logout = Button(button_frame, fg='white', bg='#CA994F', text='Se déconnecter', command=self.game_disconnect)
+        logout.grid(row=0, column=1, padx=25, pady=10, ipadx=15, ipady=5)
+
+        quit = Button(button_frame, fg='white', bg='#CA994F', text='Fermer la fenêtre', command=self.windows.destroy)
+        quit.grid(row=0, column=2, padx=25, pady=10, ipadx=15, ipady=5)
 
     def game_join(self):
-        """ Evenement pour ouvrir la fenêtre du jeu """
+        """ Event to open the game window """
         self.event_generate('<<GAME_JOIN>>')
 
     def game_disconnect(self):
-        """ Evenement pour se déconnecter du jeu """
+        """ Event to disconnect from the game """
         self.event_generate('<<LOGOUT_GAME>>')
